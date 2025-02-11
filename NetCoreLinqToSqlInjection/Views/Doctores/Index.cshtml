@@ -2,12 +2,41 @@
 
 <div class="container mt-4">
     <h1 class="text-primary">Doctores SQL Server/Oracle</h1>
+
     <div class="d-flex justify-content-between align-items-center mb-3">
         <p class="lead">Lista de Doctores registrados en la base de datos.</p>
         <a asp-controller="Doctores" asp-action="Create" class="btn btn-success">
             <i class="bi bi-person-plus-fill"></i> Nuevo Doctor
         </a>
     </div>
+
+    <!-- FORMULARIO PARA BUSCAR POR ESPECIALIDAD -->
+    <form asp-controller="Doctores" asp-action="Buscar" method="post" class="mb-4">
+        <div class="row">
+            <div class="col-md-6">
+                <label for="especialidad" class="form-label">Seleccione una especialidad:</label>
+                <select name="especialidad" id="especialidad" class="form-select">
+                    @if (ViewData["ESPECIALIDAD"] != null && ViewData["ESPECIALIDAD"] is List<string> especialidades)
+                    {
+                        @foreach (var especialidad in especialidades)
+                        {
+                            <option value="@especialidad">@especialidad</option>
+                        }
+                    }
+                    else
+                    {
+                        <option value="">No hay especialidades disponibles</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-search"></i> Buscar
+                </button>
+            </div>
+        </div>
+    </form>
+
 
     <div class="table-responsive">
         <table class="table table-hover table-bordered">
@@ -23,31 +52,40 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach (Doctor doctor in Model)
+                @if (Model.Count == 0)
                 {
                     <tr>
-                        <td>@doctor.IdDoctor</td>
-                        <td>@doctor.Apellido</td>
-                        <td>@doctor.Especialidad</td>
-                        <td>@doctor.Salario.ToString("C")</td>
-                        <td>@doctor.IdHospital</td>
-                        <td>
-                            <a asp-controller="Doctores"
-							   asp-action="Delete"
-							   asp-route-iddoctor="@doctor.IdDoctor"
-							   class="btn btn-danger">
-								Delete
-							</a>
-						</td>
-                        <td>
-                            <a asp-controller="Doctores"
-                               asp-action="Edit"
-                               asp-route-iddoctor="@doctor.IdDoctor"
-                               class="btn btn-primary">
-                                Edit
-                            </a>
-                        </td>
+                        <td colspan="7" class="text-center text-danger">No hay doctores en la especialidad seleccionada.</td>
                     </tr>
+                }
+                else
+                {
+                    @foreach (Doctor doctor in Model)
+                    {
+                        <tr>
+                            <td>@doctor.IdDoctor</td>
+                            <td>@doctor.Apellido</td>
+                            <td>@doctor.Especialidad</td>
+                            <td>@doctor.Salario.ToString("C")</td>
+                            <td>@doctor.IdHospital</td>
+                            <td>
+                                <a asp-controller="Doctores"
+                                   asp-action="Delete"
+                                   asp-route-iddoctor="@doctor.IdDoctor"
+                                   class="btn btn-danger">
+                                    Delete
+                                </a>
+                            </td>
+                            <td>
+                                <a asp-controller="Doctores"
+                                   asp-action="Edit"
+                                   asp-route-iddoctor="@doctor.IdDoctor"
+                                   class="btn btn-primary">
+                                    Edit
+                                </a>
+                            </td>
+                        </tr>
+                    }
                 }
             </tbody>
         </table>

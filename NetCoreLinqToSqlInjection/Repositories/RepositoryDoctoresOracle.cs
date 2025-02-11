@@ -15,7 +15,7 @@ using static Azure.Core.HttpHeader;
 //end;
 #endregion
 
-#region procedure update Doctor Oracle
+#region procedure update y select Doctor Oracle
 //CREATE OR REPLACE PROCEDURE sp_update_doctor(
 //    p_idDoctor IN NUMBER,
 //    p_apellido IN VARCHAR2,
@@ -32,18 +32,28 @@ using static Azure.Core.HttpHeader;
 //        HOSPITAL_COD = p_idHospital
 //    WHERE DOCTOR_NO = p_idDoctor;
 //END;
+
+//CREATE OR REPLACE PROCEDURE sp_get_by_especialidad(
+//    p_especialidad IN VARCHAR2,
+//    cur OUT SYS_REFCURSOR
+//)
+//AS
+//BEGIN
+//    OPEN cur FOR
+//    SELECT DOCTOR_NO, APELLIDO, ESPECIALIDAD, SALARIO, HOSPITAL_COD 
+//    FROM DOCTOR 
+//    WHERE ESPECIALIDAD = p_especialidad;
+//END;
 #endregion
 
 namespace NetCoreLinqToSqlInjection.Repositories
 {
-
     public class RepositoryDoctoresOracle : IRepositoryDoctores
 
     {
         private DataTable tablaDoctores;
         private OracleConnection cn;
         private OracleCommand com;
-
         public RepositoryDoctoresOracle()
         {
             string connectionString =
@@ -56,11 +66,10 @@ namespace NetCoreLinqToSqlInjection.Repositories
                 ("select * from DOCTOR", connectionString);
             ad.Fill(this.tablaDoctores);
         }
-
         public void DeleteDoctor(int idDoctor)
         {
             string sql = "sp_delete_doctor";
-            OracleParameter pamId = 
+            OracleParameter pamId =
                 new OracleParameter(":p_iddoctor", idDoctor);
             this.com.Parameters.Add(pamId);
             this.com.CommandType = CommandType.StoredProcedure;
@@ -70,7 +79,6 @@ namespace NetCoreLinqToSqlInjection.Repositories
             this.cn.Close();
             this.com.Parameters.Clear();
         }
-
         public List<Doctor> GetDoctores()
         {
             var consulta = from datos in this.tablaDoctores.AsEnumerable()
@@ -88,12 +96,6 @@ namespace NetCoreLinqToSqlInjection.Repositories
             }
             return doctores;
         }
-
-        public List<Doctor> GetDoctoresByEspecialidad(string especialidad)
-        {
-            throw new NotImplementedException();
-        }
-
         public void InsertDoctor(int idDoctor, string apellido, string especialidad, int salario, int idHospital)
         {
             string sql = "INSERT INTO DOCTOR (DOCTOR_NO, APELLIDO, ESPECIALIDAD, SALARIO, HOSPITAL_COD) " +
@@ -130,6 +132,68 @@ namespace NetCoreLinqToSqlInjection.Repositories
             this.cn.Open();
             this.com.ExecuteNonQuery();
             this.cn.Close();
+        }
+        public List<Doctor> GetDoctoresByEspecialidad(string especialidad)
+        {
+            List<Doctor> doctores = new List<Doctor>();
+
+            if (especialidad == "Todas" || string.IsNullOrEmpty(especialidad))
+            {
+                return GetDoctores(); // Si selecciona "Todas", devolvemos todos los doctores
+            }
+
+            string sql = "sp_get_by_especialidad";
+            this.com.Parameters.Clear();
+            this.com.CommandText = sql;
+            this.com.CommandType = CommandType.StoredProcedure;
+
+            this.com.Parameters.Add(new OracleParameter("p_especialidad", OracleDbType.Varchar2) { Value = especialidad });
+
+            OracleParameter outputCursor = new OracleParameter("cur", OracleDbType.RefCursor);
+            outputCursor.Direction = ParameterDirection.Output;
+            this.com.Parameters.Add(outputCursor);
+
+            this.cn.Open();
+            OracleDataReader reader = this.com.ExecuteReader();
+
+            while (reader.Read())
+            {
+                Doctor doc = new Doctor
+                {
+                    IdDoctor = reader.GetInt32(0),
+                    Apellido = reader.GetString(1),
+                    Especialidad = reader.GetString(2),
+                    Salario = reader.GetInt32(3),
+                    IdHospital = reader.GetInt32(4)
+                };
+                doctores.Add(doc);
+            }
+
+            reader.Close();
+            this.cn.Close();
+            return doctores;
+        }
+
+        public List<string> GetEspecialidades()
+        {
+            List<string> especialidades = new List<string> { "Todas" }; // Agregamos "Todas" como primera opción
+            string sql = "SELECT DISTINCT ESPECIALIDAD FROM DOCTOR";
+
+            this.com.Parameters.Clear();
+            this.com.CommandText = sql;
+            this.com.CommandType = CommandType.Text;
+
+            this.cn.Open();
+            OracleDataReader reader = this.com.ExecuteReader();
+
+            while (reader.Read())
+            {
+                especialidades.Add(reader.GetString(0));
+            }
+
+            reader.Close();
+            this.cn.Close();
+            return especialidades;
         }
     }
 }

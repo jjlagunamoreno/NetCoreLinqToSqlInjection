@@ -16,6 +16,7 @@ namespace NetCoreLinqToSqlInjection.Controllers
         public IActionResult Index()
         {
             List<Doctor> doctores = this.repo.GetDoctores();
+            ViewData["ESPECIALIDAD"] = this.repo.GetEspecialidades(); // Cargar especialidades desde el inicio
             return View(doctores);
         }
 
@@ -27,8 +28,7 @@ namespace NetCoreLinqToSqlInjection.Controllers
         [HttpPost]
         public IActionResult Create(Doctor doc)
         {
-            this.repo.InsertDoctor(doc.IdDoctor, doc.Apellido
-                , doc.Especialidad, doc.Salario, doc.IdHospital);
+            this.repo.InsertDoctor(doc.IdDoctor, doc.Apellido, doc.Especialidad, doc.Salario, doc.IdHospital);
             return RedirectToAction("Index");
         }
 
@@ -55,6 +55,22 @@ namespace NetCoreLinqToSqlInjection.Controllers
             return RedirectToAction("Index");
         }
 
+        [HttpPost]
+        public IActionResult Buscar(string especialidad)
+        {
+            List<Doctor> doctores;
 
+            if (especialidad == "Todas" || string.IsNullOrEmpty(especialidad))
+            {
+                doctores = this.repo.GetDoctores(); // Si selecciona "Todas", devolvemos todos los doctores
+            }
+            else
+            {
+                doctores = this.repo.GetDoctoresByEspecialidad(especialidad);
+            }
+
+            ViewData["ESPECIALIDAD"] = this.repo.GetEspecialidades();
+            return View("Index", doctores);
+        }
     }
 }

@@ -13,6 +13,8 @@ namespace NetCoreLinqToSqlInjection.Repositories
 
         void UpdateDoctor(int idDoctor, string apellido, string especialidad, int salario, int idHospital);
 
+        List<Doctor> GetDoctoresByEspecialidad(string especialidad);
+        List<string> GetEspecialidades();
 
     }
 }

@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Data.SqlClient;
 using NetCoreLinqToSqlInjection.Models;
 
-#region PROCEDURE PARA UPDATE DOCTOR EN SQL SERVER
+#region PROCEDURE PARA UPDATE Y BUSQUEDA POR SELECT DOCTOR EN SQL SERVER
 //CREATE PROCEDURE sp_update_doctor
 //    @idDoctor INT,
 //    @apellido NVARCHAR(50),
@@ -21,6 +21,16 @@ using NetCoreLinqToSqlInjection.Models;
 //        HOSPITAL_COD = @idHospital
 //    WHERE DOCTOR_NO = @idDoctor;
 //END;
+
+//CREATE PROCEDURE sp_get_by_especialidad
+//    @especialidad NVARCHAR(50)
+//AS
+//BEGIN
+//    SELECT DOCTOR_NO, APELLIDO, ESPECIALIDAD, SALARIO, HOSPITAL_COD 
+//    FROM DOCTOR 
+//    WHERE ESPECIALIDAD = @especialidad;
+//END;
+
 
 #endregion
 
@@ -109,5 +119,57 @@ namespace NetCoreLinqToSqlInjection.Repositories
             this.cn.Close();
         }
 
+        public List<string> GetEspecialidades()
+        {
+            List<string> especialidades = new List<string> { "Todas" }; // Agregamos "Todas" como primera opción
+            string sql = "SELECT DISTINCT ESPECIALIDAD FROM DOCTOR";
+
+            this.com.Parameters.Clear();
+            this.com.CommandText = sql;
+            this.com.CommandType = CommandType.Text;
+
+            this.cn.Open();
+            SqlDataReader reader = this.com.ExecuteReader();
+
+            while (reader.Read())
+            {
+                especialidades.Add(reader.GetString(0));
+            }
+
+            reader.Close();
+            this.cn.Close();
+            return especialidades;
+        }
+
+        public List<Doctor> GetDoctoresByEspecialidad(string especialidad)
+        {
+            List<Doctor> doctores = new List<Doctor>();
+
+            string sql = "sp_get_by_especialidad";
+            this.com.Parameters.Clear();
+            this.com.CommandText = sql;
+            this.com.CommandType = CommandType.StoredProcedure;
+            this.com.Parameters.AddWithValue("@especialidad", especialidad);
+
+            this.cn.Open();
+            SqlDataReader reader = this.com.ExecuteReader();
+
+            while (reader.Read())
+            {
+                Doctor doc = new Doctor
+                {
+                    IdDoctor = reader.GetInt32(0),
+                    Apellido = reader.GetString(1),
+                    Especialidad = reader.GetString(2),
+                    Salario = reader.GetInt32(3),
+                    IdHospital = reader.GetInt32(4)
+                };
+                doctores.Add(doc);
+            }
+
+            reader.Close();
+            this.cn.Close();
+            return doctores;
+        }
     }
 }
