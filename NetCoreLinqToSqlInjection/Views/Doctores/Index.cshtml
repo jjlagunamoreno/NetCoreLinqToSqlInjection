@@ -1,0 +1,55 @@
+﻿@model List<Doctor>
+
+<div class="container mt-4">
+    <h1 class="text-primary">Doctores SQL Server/Oracle</h1>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <p class="lead">Lista de Doctores registrados en la base de datos.</p>
+        <a asp-controller="Doctores" asp-action="Create" class="btn btn-success">
+            <i class="bi bi-person-plus-fill"></i> Nuevo Doctor
+        </a>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover table-bordered">
+            <thead class="table-dark">
+                <tr>
+                    <th scope="col">ID Doctor</th>
+                    <th scope="col">Apellido</th>
+                    <th scope="col">Especialidad</th>
+                    <th scope="col">Salario</th>
+                    <th scope="col">Hospital</th>
+                    <th scope="col">Borrar</th>
+                    <th scope="col">Editar</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (Doctor doctor in Model)
+                {
+                    <tr>
+                        <td>@doctor.IdDoctor</td>
+                        <td>@doctor.Apellido</td>
+                        <td>@doctor.Especialidad</td>
+                        <td>@doctor.Salario.ToString("C")</td>
+                        <td>@doctor.IdHospital</td>
+                        <td>
+                            <a asp-controller="Doctores"
+							   asp-action="Delete"
+							   asp-route-iddoctor="@doctor.IdDoctor"
+							   class="btn btn-danger">
+								Delete
+							</a>
+						</td>
+                        <td>
+                            <a asp-controller="Doctores"
+                               asp-action="Edit"
+                               asp-route-iddoctor="@doctor.IdDoctor"
+                               class="btn btn-primary">
+                                Edit
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

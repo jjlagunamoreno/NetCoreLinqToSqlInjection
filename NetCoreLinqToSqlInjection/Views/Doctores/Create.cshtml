@@ -1,0 +1,43 @@
+﻿<div class="container mt-4">
+    <h1 class="text-primary">Registrar Nuevo Doctor</h1>
+    <p>
+        <a asp-controller="Doctores" asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Volver a la Lista
+        </a>
+    </p>
+
+    <div class="card shadow-lg">
+        <div class="card-body">
+            <form method="post">
+                <div class="mb-3">
+                    <label for="iddoctor" class="form-label">ID Doctor</label>
+                    <input type="text" name="iddoctor" class="form-control" placeholder="Ej: 101">
+                </div>
+
+                <div class="mb-3">
+                    <label for="apellido" class="form-label">Apellido</label>
+                    <input type="text" name="apellido" class="form-control" placeholder="Ej: Pérez">
+                </div>
+
+                <div class="mb-3">
+                    <label for="especialidad" class="form-label">Especialidad</label>
+                    <input type="text" name="especialidad" class="form-control" placeholder="Ej: Cardiología">
+                </div>
+
+                <div class="mb-3">
+                    <label for="salario" class="form-label">Salario</label>
+                    <input type="text" name="salario" class="form-control" placeholder="Ej: 50000">
+                </div>
+
+                <div class="mb-3">
+                    <label for="idhospital" class="form-label">ID Hospital</label>
+                    <input type="text" name="idhospital" class="form-control" placeholder="Ej: 19">
+                </div>
+
+                <button type="submit" class="btn btn-success">
+                    <i class="bi bi-check-circle-fill"></i> Crear Doctor
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
